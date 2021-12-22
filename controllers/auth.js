@@ -28,9 +28,9 @@ exports.signup = (req, res) => {
                 role: req.body.role,
                 token: token
             });
-            if(newUser){
+            if (newUser) {
                 console.log("User Created Successfully...")
-            }else{
+            } else {
                 console.log("User NOt created")
             }
             //salt to encrypt the password
@@ -54,74 +54,68 @@ exports.signup = (req, res) => {
 
 exports.signin = (req, res) => {
     const { email, password } = req.body;
-    console.log("====", req.body)
     User.findOne({ email }, (err, user) => {
         if (err || !user) {
             return res.status(400).json({
                 error: "User with this Email Not Registered in DB"
             })
         }
-             bcrypt.compare(password, user.password, function(err, result) {
-                if (result) {
-                    const payload = {
+        bcrypt.compare(password, user.password, function (err, result) {
+            // Result contains true or flase
+            if (result) {
+                res.json({
+                    success: true,
+                    token: user.token,
+                    user: {
                         id: user._id,
                         name: user.name,
                         email: user.email,
                         role: user.role,
-                    };
-                    jwt.sign(
-                        payload,
-                        process.env.SECRET,
-                        (err, token) => {
-                            res.json({
-                                success: true,
-                                token,
-                                user: {
-                                    id: user._id,
-                                    name: user.name,
-                                    email: user.email,
-                                    role: user.role,
-                                }
-                            });
-                        }
-                    );
-                }
-                else {
-                    res.status(401).json({ error: "In-Correct Password" });
-                }
-            })
+                    }
+                });
+            }
+            else {
+                res.status(401).json({ error: "In-Correct Password" });
+            }
         })
+    })
+}
+
+exports.signout = (req, res) => {
+    res.clearCookie("token")
+    res.json({
+        message: 'User Signed Out Successfully'
+    })
+};
+
+exports.isSignedIn = expressJwt({
+    secret: process.env.SECRET,
+    userProperty: "auth",
+    algorithms: ['HS256']
+})
+
+exports.isAuthenticated = (req, res, next) => {
+    let checker = req.header("Authorization");
+    // Bearer and token are splitting to make use of token
+    const bearertoken = checker.split(' ');
+    const actualtoken = bearertoken[1];
+    User.findOne({ _id: req.params.userId }).then(user => {
+        if (user.token === actualtoken) {
+            return next();
+        }
+        else{
+            return res.status(400).json({
+                error: "ACCESS DENIED,User token mismatched with JWT Token present in Headers..."
+            });
+        }
+    })
+}
+
+exports.isAdmin = (req, res, next) => {
+    if (req.profile.role === 0) {
+        return res.status(403).json({
+            error: "You are not ADMIN, Access Denied"
+        });
     }
-
-        exports.signout = (req, res) => {
-            res.clearCookie("token")
-            res.json({
-                message: 'User Signed Out Successfully'
-            })
-        };
-
-        exports.isSignedIn = expressJwt({
-            secret: process.env.SECRET,
-            userProperty: "auth",
-            algorithms: ['HS256']
-        })
-
-        exports.isAuthenticated = (req, res, next) => {
-            console.log("Req Check==",req,"Res==",res,"REq.params=",req.params)
-            let checker = req.profile && req.auth && req.profile._id == req.params.userId;
-            if (!checker) {
-                return res.status(403).json({
-                    error: "ACCESS DENIED"
-                });
-            }
-            next();
-        }
-
-        exports.isAdmin = (req, res, next) => {
-            if (req.profile.role === 0) {
-                return res.status(403).json({
-                    error: "You are not ADMIN, Access Denied"
-                });
-            }
-            next();
-        }
+    next();
+}

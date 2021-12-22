@@ -8,7 +8,8 @@ const cors = require("cors");
 
 // My Routes initalization
 const authRoutes = require("./routes/auth");
-const userRoutes = require("./routes/user")
+const userRoutes = require("./routes/user");
+const productRoutes = require("./routes/product")
 
 //Middlewares
 app.use(bodyParser.json());
@@ -17,7 +18,8 @@ app.use(cors());
 
 // My Routes useage
 app.use('/api',authRoutes);
-app.use('/api',userRoutes)
+app.use('/api',userRoutes);
+app.use('/api',productRoutes)
 
 // DataBase Connection
 mongoose.connect(process.env.Database, { 

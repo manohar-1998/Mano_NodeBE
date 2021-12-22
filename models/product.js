@@ -2,6 +2,7 @@ const mongoose = require("mongoose")
 const {ObjectId} = mongoose.Schema;
 
 const productSchema = new mongoose.Schema({
+    userid: { type:ObjectId, ref: 'User', required: true },
     name:{
         type:String,
         trim:true,
@@ -23,7 +24,7 @@ const productSchema = new mongoose.Schema({
     category:{
         type:ObjectId,
         ref: "Category",
-        required:true
+        // required:true
     },
     stock:{
         type:Number
