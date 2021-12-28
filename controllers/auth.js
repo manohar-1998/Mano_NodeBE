@@ -95,6 +95,7 @@ exports.isSignedIn = expressJwt({
 })
 
 exports.isAuthenticated = (req, res, next) => {
+    console.log("Authentication check successfull...")
     let checker = req.header("Authorization");
     // Bearer and token are splitting to make use of token
     const bearertoken = checker.split(' ');
@@ -103,19 +104,30 @@ exports.isAuthenticated = (req, res, next) => {
         if (user.token === actualtoken) {
             return next();
         }
-        else{
+        else {
             return res.status(400).json({
-                error: "ACCESS DENIED,User token mismatched with JWT Token present in Headers..."
+                error: "ACCESS DENIED,User Token mismatched with JWT Token present in Headers..."
             });
         }
     })
 }
 
 exports.isAdmin = (req, res, next) => {
-    if (req.profile.role === 0) {
-        return res.status(403).json({
-            error: "You are not ADMIN, Access Denied"
-        });
-    }
-    next();
+    console.log("Inside Admin Check", "req.body check=", req.body, "params check=", req.params.userId);
+    User.findOne({ _id: req.params.userId }).then(user => {
+        console.log("user check=", user)
+        if (user.role === 1) {
+            next();
+        }
+        else {
+            return res.status(403).json({
+                error: "You are not ADMIN, Access Denied"
+            });
+        }
+    })
+    // if (req.profile.role === 0) {
+    //     return res.status(403).json({
+    //         error: "You are not ADMIN, Access Denied"
+    //     });
+    // }
 }

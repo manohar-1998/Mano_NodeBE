@@ -10,7 +10,7 @@ const cors = require("cors");
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");
 const productRoutes = require("./routes/product")
-
+const categoryRoutes = require("./routes/category")
 //Middlewares
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -20,6 +20,7 @@ app.use(cors());
 app.use('/api',authRoutes);
 app.use('/api',userRoutes);
 app.use('/api',productRoutes)
+app.use('/api',categoryRoutes)
 
 // DataBase Connection
 mongoose.connect(process.env.Database, { 

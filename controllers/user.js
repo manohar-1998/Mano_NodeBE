@@ -30,12 +30,10 @@ exports.getAllUsers = (req,res)=>{
 };
 
 exports.updateUser = (req,res)=>{
-    User.findByIdAndUpdate(
-        {_id : req.profile._id},
-        {$set: req.body},
-        {new : true, useFindAndModify: false},
-        (err,user)=>{
-            if(err){
+    const updates = req.body;
+    const options = { new: true }
+    User.findByIdAndUpdate(req.params.userId, updates, options, (err, user) =>{
+            if(err || !user){
                 return res.status(400).json({
                     error:"Not Authorized to Update the Profile"
                 })
@@ -43,4 +41,19 @@ exports.updateUser = (req,res)=>{
             res.json(user);
         }
     )
+}
+
+exports.deleteUser = (req,res)=>{
+    User.findByIdAndDelete(req.params.userId,(err,result)=>{
+        if(!result){
+            return res.status(404).json({
+                error:"Error while Deleting the User from DB"
+            })
+        }
+        else{
+            res.status(200).json({
+                message:"User Deleted SUccessfully..."
+            })
+        }
+    })
 }

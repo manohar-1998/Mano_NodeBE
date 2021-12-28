@@ -40,7 +40,7 @@ exports.products = (req, res) => {
 exports.updateProduct = (req, res) => {
         const updates = req.body;
         const options = { new: true }
-        const updatedproduct = Product.findByIdAndUpdate(req.params.id, updates, options, (err, prod) => {
+        Product.findByIdAndUpdate(req.params.id, updates, options, (err, prod) => {
             if (!prod) return res.status(404).send({
               success: false,
               error: 'Product not found'
